@@ -1,5 +1,5 @@
 import { type State, state } from '@nerdalytics/beacon'
-import { BeaconCache, type CleanupFn } from '../src/index.ts'
+import { BeaconRewind, type CleanupFn } from '../src/index.ts'
 
 interface AppSettings {
 	theme: 'light' | 'dark'
@@ -7,8 +7,8 @@ interface AppSettings {
 	notifications: boolean
 }
 
-// Create a cache instance with a persistent database
-const cache: BeaconCache = new BeaconCache({
+// Create a BeaconRewind instance with a persistent database
+const db: BeaconRewind = new BeaconRewind({
 	databasePath: 'settings.sqlite',
 })
 
@@ -22,16 +22,16 @@ const settings: State<AppSettings> = state({
 console.debug('=== Cache Restoration Demo ===')
 console.debug('Initial state:', settings())
 
-// Cache the state - this will restore from database if it exists
-const _cleanup: CleanupFn | undefined = cache.cache('appSettings', settings)
+// Persist the state - this will restore from database if it exists
+const _cleanup: CleanupFn | undefined = db.persist('appSettings', settings)
 
-// Check if we restored from cache or using initial values
+// Check if we restored from disk or using initial values
 const currentSettings: AppSettings = settings()
 if (currentSettings.theme === 'dark' && currentSettings.language === 'es') {
-	console.debug('✅ State restored from cache!')
+	console.debug('✅ State restored from disk!')
 	console.debug('Restored state:', currentSettings)
 } else {
-	console.debug('📝 Using initial state (no cache found)')
+	console.debug('📝 Using initial state (no persisted state found)')
 
 	// Update the state - this will be persisted automatically
 	console.debug('\nUpdating settings...')
@@ -41,12 +41,12 @@ if (currentSettings.theme === 'dark' && currentSettings.language === 'es') {
 		theme: 'dark',
 	})
 	console.debug('Updated state:', settings())
-	console.debug('\n💾 State has been saved to cache')
-	console.debug('Run this script again to see cache restoration!')
+	console.debug('\n💾 State has been saved to disk')
+	console.debug('Run this script again to see state restoration!')
 }
 
 // Important: Don't call cleanup() here!
 // cleanup() drops the table, preventing restoration on next run
-// Only call cleanup() when you want to completely remove cached data
+// Only call cleanup() when you want to completely remove persisted data
 
 console.debug('\n=== End of Demo ===')

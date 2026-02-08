@@ -1,5 +1,5 @@
 import { effect, type State, state } from '@nerdalytics/beacon'
-import { BeaconCache, type CleanupFn } from '../src/index.ts'
+import { BeaconRewind, type CleanupFn } from '../src/index.ts'
 
 interface User {
 	name: string
@@ -7,8 +7,8 @@ interface User {
 	loggedIn: boolean
 }
 
-// Create a new cache instance
-const db: BeaconCache = new BeaconCache({
+// Create a new BeaconRewind instance
+const db: BeaconRewind = new BeaconRewind({
 	// optional database path; defaults to in-memory, otherwise on-disk
 	databasePath: 'test.sqlite',
 })
@@ -28,15 +28,15 @@ effect((): void => {
 	console.debug(`User Bob's role is: ${bob.role}`)
 })
 
-// Cache the state
+// Persist the state
 // This will persist the state of userBob in the database
-// The cache key is "userBob"
+// The key is "userBob"
 // // If the state already exists in the database, it will be restored
-const cleanup: CleanupFn | undefined = db.cache('userBob', userBob)
+const cleanup: CleanupFn | undefined = db.persist('userBob', userBob)
 
 // Show the state of userBob setting up cache
-// If userBob role is admin, it was restored from cache, because we set it to admin at the end of example
-console.debug(userBob().role === 'user' ? 'Restored from cache' : 'New state')
+// If userBob role is admin, it was restored from disk, because we set it to admin at the end of example
+console.debug(userBob().role === 'user' ? 'Restored from disk' : 'New state')
 
 // Update via set function; persist automatically
 userBob.set({
@@ -53,7 +53,7 @@ userBob.update(
 	})
 )
 
-// Stop persisting changes and delete the state from the cache
+// Stop persisting changes and drop the table
 if (cleanup) {
 	cleanup()
 }
@@ -80,12 +80,12 @@ effect((): void => {
 })
 
 // Persist multiple states
-const _cleanupAlice: CleanupFn | undefined = db.cache('userAlice', userAlice)
-const _cleanupBob: CleanupFn | undefined = db.cache('userBob', userBob)
+const _cleanupAlice: CleanupFn | undefined = db.persist('userAlice', userAlice)
+const _cleanupBob: CleanupFn | undefined = db.persist('userBob', userBob)
 
 // Show the state of userAlice setting up cache
-// If userAlice role is admin, it was restored from cache
-console.debug(userAlice().role === 'user' ? 'Restored from cache' : 'New state')
+// If userAlice role is admin, it was restored from disk
+console.debug(userAlice().role === 'user' ? 'Restored from disk' : 'New state')
 
 userBob.update(
 	(current: User): User => ({
