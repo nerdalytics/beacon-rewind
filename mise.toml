@@ -1,0 +1,29 @@
+[tools]
+node = "24.13.0"
+
+[env]
+NODE_COMPILER_CACHE = "$TMPDIR/.node-cache"
+# NODE_COMPILER_CACHE = false
+
+[tasks.interactive-dependency-update]
+alias = "m:deps:update"
+description = "Interactive dependencies update"
+run = ["npx npm-check --update --save-exact --color --emoji --spinner"]
+
+[tasks.lint-biome]
+run = ["biome lint"]
+
+[tasks.biome-lint-fix]
+run = ["biome lint --fix"]
+
+[tasks.biome-lint-fix-unsafe]
+run = ["biome lint --fix --unsafe"]
+
+[tasks.format]
+run = ["biome format --write"]
+
+[tasks.check]
+run = ["biome check"]
+
+[tasks.check-fix]
+run = ["biome check --write"]

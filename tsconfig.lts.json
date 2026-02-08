@@ -1,0 +1,59 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"allowJs": false,
+		"allowSyntheticDefaultImports": true,
+		"allowUnreachableCode": false,
+		"declaration": true,
+		"esModuleInterop": true,
+		"exactOptionalPropertyTypes": true,
+		"forceConsistentCasingInFileNames": true,
+		"importHelpers": true,
+		"isolatedModules": true,
+		"lib": [
+			"ES2022",
+			"ESNext.AsyncIterable"
+		],
+		"module": "NodeNext",
+		"moduleDetection": "force",
+		"moduleResolution": "NodeNext",
+		"noEmit": false,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": false,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": true,
+		"outDir": "./dist",
+		"removeComments": true,
+		"resolveJsonModule": true,
+		"rewriteRelativeImportExtensions": true,
+		"rootDir": "./",
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"strictFunctionTypes": true,
+		"target": "ES2022",
+		"types": [
+			"node"
+		],
+		"useDefineForClassFields": true
+	},
+	"exclude": [
+		"biome.json",
+		"dist",
+		"node_modules",
+		"package-lock.json",
+		"package.json",
+		"temp",
+		"tests/template.test.ts",
+		"tsconfig.json",
+		"tsconfig.lts.json"
+	],
+	"include": [
+		"**/*.json",
+		"**/*.ts"
+	]
+}

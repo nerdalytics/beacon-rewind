@@ -1,0 +1,122 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on",
+				"useSortedKeys": "on",
+				"useSortedProperties": "on"
+			}
+		}
+	},
+	"files": {
+		"ignoreUnknown": true,
+		"includes": [
+			"*.json",
+			"**/*.js",
+			"**/*.ts",
+			"!package-lock.json",
+			"!tests/test.template.ts",
+			"!**/dist/**/*",
+			"!**/temp/**/*",
+			"!**/node_modules/**/*"
+		]
+	},
+	"formatter": {
+		"bracketSpacing": true,
+		"enabled": true,
+		"expand": "always",
+		"formatWithErrors": false,
+		"indentStyle": "tab",
+		"lineEnding": "lf",
+		"lineWidth": 120,
+		"useEditorconfig": false
+	},
+	"javascript": {
+		"formatter": {
+			"arrowParentheses": "always",
+			"bracketSameLine": true,
+			"bracketSpacing": true,
+			"enabled": true,
+			"quoteStyle": "single",
+			"semicolons": "asNeeded",
+			"trailingCommas": "es5"
+		},
+		"globals": []
+	},
+	"json": {
+		"formatter": {
+			"enabled": true,
+			"trailingCommas": "none"
+		},
+		"parser": {
+			"allowComments": false,
+			"allowTrailingCommas": false
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"a11y": {
+				"recommended": false
+			},
+			"complexity": {
+				"noBannedTypes": "error",
+				"useLiteralKeys": "error"
+			},
+			"correctness": {
+				"noNodejsModules": {
+					"level": "off"
+				},
+				"noUnusedVariables": "warn",
+				"useExhaustiveDependencies": "error"
+			},
+			"nursery": {
+				"useExplicitType": "error"
+			},
+			"performance": {
+				"noAccumulatingSpread": "error"
+			},
+			"recommended": true,
+			"security": {
+				"noGlobalEval": "error"
+			},
+			"style": {
+				"noNegationElse": "error",
+				"useConsistentArrayType": {
+					"level": "error",
+					"options": {
+						"syntax": "shorthand"
+					}
+				}
+			},
+			"suspicious": {
+				"noConsole": {
+					"level": "error",
+					"options": {
+						"allow": [
+							"error",
+							"warn",
+							"dir",
+							"info",
+							"debug",
+							"table",
+							"time",
+							"timeEnd",
+							"timeLog",
+							"trace"
+						]
+					}
+				},
+				"noExplicitAny": "error"
+			}
+		}
+	},
+	"vcs": {
+		"clientKind": "git",
+		"defaultBranch": "trunk",
+		"enabled": true,
+		"root": ".",
+		"useIgnoreFile": false
+	}
+}

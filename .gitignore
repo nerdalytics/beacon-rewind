@@ -1,0 +1,46 @@
+# Ignore everything by default
+*
+*/
+
+# Then explicitly allow what we want
+
+# Folders
+!examples/
+!examples/*.ts
+!src/
+!src/**/
+!src/**/*.ts
+!tests/
+!tests/*.ts
+
+# Files in root
+!.gitattributes
+!.gitignore
+!.npmrc
+!biome.json
+!LICENSE
+!mise.toml
+!package-lock.json
+!package.json
+!tsconfig.json
+!tsconfig.lts.json
+
+# Allow markdown anywhere
+!**/*.md
+
+# But still ignore these specific patterns everywhere
+**/node_modules/**
+*.tsbuildinfo
+coverage/
+
+*~
+
+# OS files
+**/.DS_Store
+**/.DS_Store?
+**/._*
+**/.Spotlight-V100
+**/.Trashes
+**/ehthumbs.db
+**/Thumbs.db
+**/desktop.ini
