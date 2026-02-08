@@ -8,6 +8,8 @@
 !.github/
 !.github/**/
 !.github/**/*.yml
+!assets/
+!assets/*.svg
 !examples/
 !examples/*.ts
 !src/
