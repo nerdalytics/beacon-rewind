@@ -1,4 +1,4 @@
-# Beacon Rewind <img align="right" src="https://raw.githubusercontent.com/nerdalytics/beacon/refs/heads/trunk/assets/beacon-rewind-logo.svg" width="128px" alt="A stylized lighthouse beacon with golden light against a dark blue background, representing the reactive state library"/>
+# Beacon Rewind <img align="right" src="https://raw.githubusercontent.com/nerdalytics/beacon-rewind/refs/heads/trunk/assets/beacon-rewind-logo.svg" width="128px" alt="A stylized lighthouse beacon with golden light against a dark blue background, representing the reactive state library"/>
 
 > Persist Beacon state. Rewind when you need to.
 
