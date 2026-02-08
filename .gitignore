@@ -5,6 +5,9 @@
 # Then explicitly allow what we want
 
 # Folders
+!.github/
+!.github/**/
+!.github/**/*.yml
 !examples/
 !examples/*.ts
 !src/
