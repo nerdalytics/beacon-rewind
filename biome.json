@@ -16,7 +16,6 @@
 			"**/*.js",
 			"**/*.ts",
 			"!package-lock.json",
-			"!tests/test.template.ts",
 			"!**/dist/**/*",
 			"!**/temp/**/*",
 			"!**/node_modules/**/*"

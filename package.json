@@ -14,13 +14,13 @@
 			"types": "./src/index.ts"
 		}
 	},
-	"name": "beacon-cache",
+	"name": "beacon-rewind",
 	"peerDependencies": {
 		"@nerdalytics/beacon": "^1000.3.0"
 	},
 	"scripts": {
 		"example:basic-usage": "node examples/basic-usage.ts",
-		"example:cache-restauration": "node examples/cache-restoration-demo.ts",
+		"example:persistence": "node examples/persistence-demo.ts",
 		"test": "node --test --experimental-test-coverage tests/**/*.test.ts",
 		"update-dependencies": "npx npm-check-updates --interactive --upgrade --removeRange"
 	},
