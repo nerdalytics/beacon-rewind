@@ -1,20 +1,20 @@
 import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, it } from 'node:test'
-import { BeaconCache } from '../src/index.ts'
+import { BeaconRewind } from '../src/index.ts'
 import { createMockState, createTempDbPath } from './test-helpers.ts'
 
 /**
- * Rewind method behavior tests for BeaconCache.
+ * Rewind method behavior tests for BeaconRewind.
  *
- * This file contains unit tests for BeaconCache.rewind() method, testing:
+ * This file contains unit tests for BeaconRewind.rewind() method, testing:
  * - Historical state retrieval
  * - Weak reference handling
  * - Error handling for invalid keys/steps
  * - Cleanup of garbage collected states
  */
 describe(
-	'BeaconCache rewind() method',
+	'BeaconRewind rewind() method',
 	{
 		concurrency: true,
 		timeout: 1000,
@@ -23,7 +23,7 @@ describe(
 		it('should rewind state to previous value by specified steps', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -31,7 +31,7 @@ describe(
 			})
 
 			// Act - Create history
-			const cleanup = cache.cache('versionedData', state)
+			const cleanup = cache.persist('versionedData', state)
 
 			// Add multiple versions
 			for (let i = 2; i <= 5; i++) {
@@ -55,12 +55,12 @@ describe(
 
 		it('should handle rewind when no history exists', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 			const state = createMockState({
 				value: 'current',
 			})
 
-			const cleanup = cache.cache('noHistory', state)
+			const cleanup = cache.persist('noHistory', state)
 
 			// Act
 			cache.rewind('noHistory', 5)
@@ -76,7 +76,7 @@ describe(
 
 		it('should handle rewind for non-existent key', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 
 			// Act & Assert - Should not throw
 			assert.doesNotThrow(() => {
@@ -87,7 +87,7 @@ describe(
 		it('should handle rewind after cleanup gracefully', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -95,7 +95,7 @@ describe(
 			})
 
 			// Cache and then cleanup
-			const cleanup = cache.cache('cleanedUp', state)
+			const cleanup = cache.persist('cleanedUp', state)
 			state.set({
 				data: 'updated',
 			})
@@ -115,12 +115,12 @@ describe(
 
 		it('should handle rewind with invalid steps parameter', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 			const state = createMockState({
 				value: 10,
 			})
 
-			const cleanup = cache.cache('testData', state)
+			const cleanup = cache.persist('testData', state)
 
 			state.update((current) => {
 				return {
@@ -160,7 +160,7 @@ describe(
 		it('should correctly parse JSON values from database during rewind', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const complexData = {
@@ -181,7 +181,7 @@ describe(
 			const state = createMockState(complexData)
 
 			// Act
-			const cleanup = cache.cache('complexData', state)
+			const cleanup = cache.persist('complexData', state)
 
 			// Update state
 			const newData = {
@@ -207,7 +207,7 @@ describe(
 		it('should handle multiple rewinds on same key', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -215,7 +215,7 @@ describe(
 			})
 
 			// Act - Create history
-			const cleanup = cache.cache('multiRewind', state)
+			const cleanup = cache.persist('multiRewind', state)
 
 			// Create sequence: 0, 1, 2, 3, 4
 			for (let i = 1; i <= 4; i++) {
@@ -244,7 +244,7 @@ describe(
 		it('should handle rewind with corrupted JSON data', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -252,7 +252,7 @@ describe(
 			})
 
 			// Create initial cache
-			const cleanup = cache.cache('corruptRewind', state)
+			const cleanup = cache.persist('corruptRewind', state)
 			state.set({
 				valid: 'updated',
 			})

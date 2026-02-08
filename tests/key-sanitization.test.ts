@@ -1,19 +1,19 @@
 import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, it } from 'node:test'
-import { BeaconCache } from '../src/index.ts'
+import { BeaconRewind } from '../src/index.ts'
 import { createMockState, createTempDbPath } from './test-helpers.ts'
 
 /**
- * Key sanitization tests for BeaconCache.
+ * Key sanitization tests for BeaconRewind.
  *
- * This file contains unit tests for BeaconCache key sanitization, testing:
+ * This file contains unit tests for BeaconRewind key sanitization, testing:
  * - Conversion of non-alphanumeric characters to underscores
  * - Prefix addition for valid table names
  * - Handling of special characters and edge cases
  */
 describe(
-	'BeaconCache Key Sanitization',
+	'BeaconRewind Key Sanitization',
 	{
 		concurrency: true,
 		timeout: 1000,
@@ -22,7 +22,7 @@ describe(
 		it('should preserve alphanumeric characters in keys', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -30,7 +30,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('user123Data', state)
+			const cleanup = cache.persist('user123Data', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -53,7 +53,7 @@ describe(
 		it('should convert special characters to underscores', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -129,7 +129,7 @@ describe(
 
 			for (const { key, expected } of testCases) {
 				// Act
-				const cleanup = cache.cache(key, state)
+				const cleanup = cache.persist(key, state)
 
 				// Assert
 				const db = new DatabaseSync(dbPath)
@@ -154,7 +154,7 @@ describe(
 		it('should handle keys with multiple consecutive special characters', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -162,7 +162,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('user:::data', state)
+			const cleanup = cache.persist('user:::data', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -185,7 +185,7 @@ describe(
 		it('should handle unicode characters in keys', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -193,7 +193,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('user_émoji_😀_data', state)
+			const cleanup = cache.persist('user_émoji_😀_data', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -220,7 +220,7 @@ describe(
 		it('should handle empty keys', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -228,7 +228,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('', state)
+			const cleanup = cache.persist('', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -247,7 +247,7 @@ describe(
 		it('should handle very long keys', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -256,7 +256,7 @@ describe(
 			const longKey = `${'a'.repeat(1000)}_special_chars_!@#$%^&*()`
 
 			// Act
-			const cleanup = cache.cache(longKey, state)
+			const cleanup = cache.persist(longKey, state)
 
 			// Assert - Verify table was created (name might be truncated by SQLite)
 			const db = new DatabaseSync(dbPath)
@@ -280,7 +280,7 @@ describe(
 		it('should handle keys that look like SQL injection attempts', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -296,7 +296,7 @@ describe(
 
 			for (const key of sqlInjectionKeys) {
 				// Act
-				const cleanup = cache.cache(key, state)
+				const cleanup = cache.persist(key, state)
 
 				// Assert - Verify the key was sanitized and table created safely
 				const db = new DatabaseSync(dbPath)
@@ -328,7 +328,7 @@ describe(
 		it('should handle keys starting with numbers', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -336,7 +336,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('123userData', state)
+			const cleanup = cache.persist('123userData', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -360,13 +360,13 @@ describe(
 		it('should produce consistent sanitization for same key', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache1 = new BeaconCache({
+			const cache1 = new BeaconRewind({
 				databasePath: dbPath,
 			})
-			const cache2 = new BeaconCache({
+			const cache2 = new BeaconRewind({
 				databasePath: dbPath,
 			})
-			const cache3 = new BeaconCache({
+			const cache3 = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const complexKey = 'user@domain.com/profile#123'
@@ -375,9 +375,9 @@ describe(
 			})
 
 			// Act - Cache with same key multiple times
-			const cleanup1 = cache1.cache(complexKey, state)
-			const cleanup2 = cache2.cache(complexKey, state)
-			const cleanup3 = cache3.cache(complexKey, state)
+			const cleanup1 = cache1.persist(complexKey, state)
+			const cleanup2 = cache2.persist(complexKey, state)
+			const cleanup3 = cache3.persist(complexKey, state)
 
 			// Assert - Should always produce same table name
 			const db = new DatabaseSync(dbPath)
@@ -403,7 +403,7 @@ describe(
 		it('should handle keys with only special characters', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -411,7 +411,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('!@#$%^&*()', state)
+			const cleanup = cache.persist('!@#$%^&*()', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)

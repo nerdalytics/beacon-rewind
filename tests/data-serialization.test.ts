@@ -1,20 +1,20 @@
 import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, it } from 'node:test'
-import { BeaconCache } from '../src/index.ts'
+import { BeaconRewind } from '../src/index.ts'
 import { captureConsoleError, createMockState, createTempDbPath } from './test-helpers.ts'
 
 /**
- * Data serialization tests for BeaconCache.
+ * Data serialization tests for BeaconRewind.
  *
- * This file contains unit tests for BeaconCache data serialization, testing:
+ * This file contains unit tests for BeaconRewind data serialization, testing:
  * - JSON serialization when storing values
  * - JSON deserialization when retrieving values
  * - Handling of various data types
  * - Error handling for serialization failures
  */
 describe(
-	'BeaconCache Data Serialization',
+	'BeaconRewind Data Serialization',
 	{
 		concurrency: true,
 		timeout: 1000,
@@ -23,7 +23,7 @@ describe(
 		it('should serialize and deserialize primitive values', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -49,14 +49,14 @@ describe(
 			for (const { key, value } of testCases) {
 				// Act
 				const state = createMockState(value)
-				const cleanup = cache.cache(key, state)
+				const cleanup = cache.persist(key, state)
 
 				// Create new instance to test retrieval
-				const cache2 = new BeaconCache({
+				const cache2 = new BeaconRewind({
 					databasePath: dbPath,
 				})
 				const state2 = createMockState(null)
-				const cleanup2 = cache2.cache(key, state2)
+				const cleanup2 = cache2.persist(key, state2)
 
 				// Assert
 				assert.strictEqual(state2(), value)
@@ -73,7 +73,7 @@ describe(
 		it('should serialize and deserialize complex objects', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -105,14 +105,14 @@ describe(
 
 			// Act
 			const state = createMockState(complexObject)
-			const cleanup = cache.cache('complex', state)
+			const cleanup = cache.persist('complex', state)
 
 			// Create new instance to test retrieval
-			const cache2 = new BeaconCache({
+			const cache2 = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state2 = createMockState({})
-			const cleanup2 = cache2.cache('complex', state2)
+			const cleanup2 = cache2.persist('complex', state2)
 
 			// Assert
 			assert.deepStrictEqual(state2(), complexObject)
@@ -126,7 +126,7 @@ describe(
 		it('should serialize and deserialize arrays', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -187,14 +187,14 @@ describe(
 			for (const { key, value } of testArrays) {
 				// Act
 				const state = createMockState(value)
-				const cleanup = cache.cache(key, state)
+				const cleanup = cache.persist(key, state)
 
 				// Create new instance to test retrieval
-				const cache2 = new BeaconCache({
+				const cache2 = new BeaconRewind({
 					databasePath: dbPath,
 				})
 				const state2 = createMockState([])
-				const cleanup2 = cache2.cache(key, state2)
+				const cleanup2 = cache2.persist(key, state2)
 
 				// Assert
 				assert.deepStrictEqual(state2(), value)
@@ -211,7 +211,7 @@ describe(
 		it('should handle circular references gracefully', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({})
@@ -228,8 +228,8 @@ describe(
 
 			const errorCapture = captureConsoleError()
 
-			// Act - The actual effect implementation in BeaconCache will try to serialize
-			const cleanup = cache.cache('circular', state)
+			// Act - The actual effect implementation in BeaconRewind will try to serialize
+			const cleanup = cache.persist('circular', state)
 
 			// This should work without throwing
 			assert.doesNotThrow(() => {
@@ -248,7 +248,7 @@ describe(
 		it('should handle special JSON values', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -293,14 +293,14 @@ describe(
 			for (const { key, value, expected } of testCases) {
 				// Act
 				const state = createMockState(value)
-				const cleanup = cache.cache(key, state)
+				const cleanup = cache.persist(key, state)
 
 				// Create new instance to test retrieval
-				const cache2 = new BeaconCache({
+				const cache2 = new BeaconRewind({
 					databasePath: dbPath,
 				})
 				const state2 = createMockState({})
-				const cleanup2 = cache2.cache(key, state2)
+				const cleanup2 = cache2.persist(key, state2)
 
 				// Assert
 				assert.deepStrictEqual(state2(), expected)
@@ -317,7 +317,7 @@ describe(
 		it('should handle large data serialization', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -338,14 +338,14 @@ describe(
 
 			// Act
 			const state = createMockState(largeArray)
-			const cleanup = cache.cache('largeData', state)
+			const cleanup = cache.persist('largeData', state)
 
 			// Create new instance to test retrieval
-			const cache2 = new BeaconCache({
+			const cache2 = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state2 = createMockState([])
-			const cleanup2 = cache2.cache('largeData', state2)
+			const cleanup2 = cache2.persist('largeData', state2)
 
 			// Assert
 			assert.strictEqual(state2().length, 10000)
@@ -361,7 +361,7 @@ describe(
 		it('should preserve data types through serialization', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -383,14 +383,14 @@ describe(
 
 			// Act
 			const state = createMockState(dataWithTypes)
-			const cleanup = cache.cache('types', state)
+			const cleanup = cache.persist('types', state)
 
 			// Create new instance to test retrieval
-			const cache2 = new BeaconCache({
+			const cache2 = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state2 = createMockState({})
-			const cleanup2 = cache2.cache('types', state2)
+			const cleanup2 = cache2.persist('types', state2)
 
 			// Assert - Check each type
 			const retrieved = state2() as typeof dataWithTypes
@@ -412,7 +412,7 @@ describe(
 		it('should handle deserialization errors gracefully', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -421,7 +421,7 @@ describe(
 			const errorCapture = captureConsoleError()
 
 			// Act - First cache valid data
-			const cleanup = cache.cache('corrupt', state)
+			const cleanup = cache.persist('corrupt', state)
 
 			// Manually corrupt the data in database
 			const db = new DatabaseSync(dbPath)
@@ -429,11 +429,11 @@ describe(
 			db.close()
 
 			// Try to retrieve corrupted data
-			const cache2 = new BeaconCache({
+			const cache2 = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state2 = createMockState(null)
-			const cleanup2 = cache2.cache('corrupt', state2)
+			const cleanup2 = cache2.persist('corrupt', state2)
 
 			// Assert - Should handle error and state remains at initial value
 			assert.ok(errorCapture.messages.some((msg) => msg.includes('Error getting latest value')))
@@ -449,7 +449,7 @@ describe(
 		it('should handle empty strings and whitespace', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -478,14 +478,14 @@ describe(
 			for (const { key, value } of testCases) {
 				// Act
 				const state = createMockState(value)
-				const cleanup = cache.cache(key, state)
+				const cleanup = cache.persist(key, state)
 
 				// Create new instance to test retrieval
-				const cache2 = new BeaconCache({
+				const cache2 = new BeaconRewind({
 					databasePath: dbPath,
 				})
 				const state2 = createMockState(null)
-				const cleanup2 = cache2.cache(key, state2)
+				const cleanup2 = cache2.persist(key, state2)
 
 				// Assert
 				assert.deepStrictEqual(state2(), value)
@@ -502,7 +502,7 @@ describe(
 		it('should verify data is stored as JSON text in database', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const testData = {
@@ -513,7 +513,7 @@ describe(
 
 			// Act
 			const state = createMockState(testData)
-			const cleanup = cache.cache('jsonStorage', state)
+			const cleanup = cache.persist('jsonStorage', state)
 
 			// Assert - Check raw database content
 			const db = new DatabaseSync(dbPath)

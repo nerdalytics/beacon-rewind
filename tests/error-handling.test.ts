@@ -2,20 +2,20 @@ import assert from 'node:assert/strict'
 import { chmodSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, it } from 'node:test'
-import { BeaconCache } from '../src/index.ts'
+import { BeaconRewind } from '../src/index.ts'
 import { captureConsoleError, createMockState, createTempDbPath } from './test-helpers.ts'
 
 /**
- * Error handling tests for BeaconCache.
+ * Error handling tests for BeaconRewind.
  *
- * This file contains unit tests for BeaconCache error handling, testing:
+ * This file contains unit tests for BeaconRewind error handling, testing:
  * - Graceful handling of database errors
  * - Console error logging
  * - Recovery from errors
  * - Edge case handling
  */
 describe(
-	'BeaconCache Error Handling',
+	'BeaconRewind Error Handling',
 	{
 		concurrency: true,
 		timeout: 1000,
@@ -28,7 +28,7 @@ describe(
 			// Act & Assert
 			assert.throws(
 				() => {
-					new BeaconCache({
+					new BeaconRewind({
 						databasePath: invalidPath,
 					})
 				},
@@ -47,7 +47,7 @@ describe(
 
 			// Act & Assert
 			assert.throws(() => {
-				new BeaconCache({
+				new BeaconRewind({
 					databasePath: invalidPath,
 				})
 			})
@@ -58,7 +58,7 @@ describe(
 
 		it('should handle JSON serialization errors', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 			const state = createMockState({})
 			const errorCapture = captureConsoleError()
 
@@ -73,7 +73,7 @@ describe(
 			circular.self = circular
 
 			// Act
-			const cleanup = cache.cache('circular', state)
+			const cleanup = cache.persist('circular', state)
 			state.set(circular)
 
 			// Assert
@@ -87,7 +87,7 @@ describe(
 		it('should handle JSON deserialization errors', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -96,7 +96,7 @@ describe(
 			const errorCapture = captureConsoleError()
 
 			// Create valid entry first
-			const cleanup = cache.cache('corrupt', state)
+			const cleanup = cache.persist('corrupt', state)
 
 			// Manually corrupt the data
 			const db = new DatabaseSync(dbPath)
@@ -104,13 +104,13 @@ describe(
 			db.close()
 
 			// Act - Try to retrieve corrupted data
-			const cache2 = new BeaconCache({
+			const cache2 = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state2 = createMockState({
 				default: 'value',
 			})
-			const cleanup2 = cache2.cache('corrupt', state2)
+			const cleanup2 = cache2.persist('corrupt', state2)
 
 			// Assert
 			assert.ok(errorCapture.messages.some((msg) => msg.includes('Error getting latest value for key corrupt')))
@@ -129,7 +129,7 @@ describe(
 		it('should handle cleanup errors gracefully', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -138,7 +138,7 @@ describe(
 			const errorCapture = captureConsoleError()
 
 			// Act
-			const cleanup = cache.cache('cleanupError', state)
+			const cleanup = cache.persist('cleanupError', state)
 
 			// Close the database connection to simulate an error condition
 			const db = new DatabaseSync(dbPath)
@@ -158,7 +158,7 @@ describe(
 
 		it('should handle caching with very large values', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 			// Create a very large object
 			const largeData = {
 				data: 'x'.repeat(1000000), // 1MB string
@@ -167,7 +167,7 @@ describe(
 
 			// Act & Assert - Should handle large data without issues
 			assert.doesNotThrow(() => {
-				const cleanup = cache.cache('largeData', state)
+				const cleanup = cache.persist('largeData', state)
 				cleanup?.()
 			})
 
@@ -187,7 +187,7 @@ describe(
 		`)
 			db.close()
 
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -197,7 +197,7 @@ describe(
 			// Act & Assert - This should throw due to wrong schema
 			assert.throws(
 				(): void => {
-					cache.cache('wrongSchema', state)
+					cache.persist('wrongSchema', state)
 					state.update((current) => {
 						return {
 							...current,
@@ -216,7 +216,7 @@ describe(
 
 		it('should continue working after encountering errors', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 			const state1 = createMockState({
 				value: 1,
 			})
@@ -229,12 +229,12 @@ describe(
 			const veryLongKey = 'x'.repeat(10000)
 
 			// This should work despite the long key
-			const cleanup1 = cache.cache(veryLongKey, state1)
+			const cleanup1 = cache.persist(veryLongKey, state1)
 			assert.ok(cleanup1 !== undefined)
 			cleanup1?.()
 
 			// Now try with a normal key - should still work
-			const cleanup2 = cache.cache('working', state2)
+			const cleanup2 = cache.persist('working', state2)
 
 			// Assert
 			assert.ok(cleanup2 !== undefined)
@@ -263,7 +263,7 @@ describe(
 			// Act & Assert - Should throw when trying to write to read-only database
 			assert.throws(
 				() => {
-					new BeaconCache({
+					new BeaconRewind({
 						databasePath: dbPath,
 					})
 				},
@@ -279,12 +279,12 @@ describe(
 
 		it('should handle very large step values in rewind', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 			const state = createMockState({
 				value: 'test',
 			})
 
-			const cleanup = cache.cache('largeStep', state)
+			const cleanup = cache.persist('largeStep', state)
 
 			// Act - Rewind with huge step value
 			assert.doesNotThrow(() => {

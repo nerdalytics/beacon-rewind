@@ -1,20 +1,20 @@
 import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, it } from 'node:test'
-import { BeaconCache } from '../src/index.ts'
+import { BeaconRewind } from '../src/index.ts'
 import { createMockState, createTempDbPath } from './test-helpers.ts'
 
 /**
- * Database table management tests for BeaconCache.
+ * Database table management tests for BeaconRewind.
  *
- * This file contains unit tests for BeaconCache database table management, testing:
+ * This file contains unit tests for BeaconRewind database table management, testing:
  * - Table creation for each cached key
  * - Table structure and schema
  * - View creation for latest values
  * - Data storage format
  */
 describe(
-	'BeaconCache Database Table Management',
+	'BeaconRewind Database Table Management',
 	{
 		concurrency: true,
 		timeout: 1000,
@@ -23,7 +23,7 @@ describe(
 		it('should create a unique table for each cached key', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state1 = createMockState({
@@ -34,8 +34,8 @@ describe(
 			})
 
 			// Act
-			const cleanup1 = cache.cache('users', state1)
-			const cleanup2 = cache.cache('products', state2)
+			const cleanup1 = cache.persist('users', state1)
+			const cleanup2 = cache.persist('products', state2)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -61,7 +61,7 @@ describe(
 		it('should create tables with correct schema', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -69,7 +69,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('schemaTest', state)
+			const cleanup = cache.persist('schemaTest', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -111,7 +111,7 @@ describe(
 		it('should create a view for efficient latest value access', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -119,7 +119,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('viewTest', state)
+			const cleanup = cache.persist('viewTest', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -146,7 +146,7 @@ describe(
 		it('should create tables as STRICT for type safety', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -154,7 +154,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('strictTest', state)
+			const cleanup = cache.persist('strictTest', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -175,7 +175,7 @@ describe(
 		it('should reuse existing table when caching same key multiple times', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state1 = createMockState({
@@ -186,8 +186,8 @@ describe(
 			})
 
 			// Act
-			const cleanup1 = cache.cache('reuseTest', state1)
-			const cleanup2 = cache.cache('reuseTest', state2)
+			const cleanup1 = cache.persist('reuseTest', state1)
+			const cleanup2 = cache.persist('reuseTest', state2)
 
 			// Assert - Should still have only one table
 			const db = new DatabaseSync(dbPath)
@@ -209,7 +209,7 @@ describe(
 		it('should store values as JSON text in the database', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const complexData = {
@@ -228,7 +228,7 @@ describe(
 			const state = createMockState(complexData)
 
 			// Act
-			const cleanup = cache.cache('jsonTest', state)
+			const cleanup = cache.persist('jsonTest', state)
 
 			// Assert
 			const db = new DatabaseSync(dbPath)
@@ -249,7 +249,7 @@ describe(
 		it('should handle concurrent table creation for same key gracefully', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state1 = createMockState({
@@ -260,8 +260,8 @@ describe(
 			})
 
 			// Act - Try to cache same key simultaneously
-			const cleanup1 = cache.cache('concurrent', state1)
-			const cleanup2 = cache.cache('concurrent', state2)
+			const cleanup1 = cache.persist('concurrent', state1)
+			const cleanup2 = cache.persist('concurrent', state2)
 
 			// Assert - Both should succeed without errors
 			assert.ok(cleanup1)
@@ -287,7 +287,7 @@ describe(
 		it('should create proper indexes for performance', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -295,7 +295,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('indexTest', state)
+			const cleanup = cache.persist('indexTest', state)
 
 			// Assert - Check if id column has an index (as primary key)
 			const db = new DatabaseSync(dbPath)
@@ -317,7 +317,7 @@ describe(
 		it('should handle table names with maximum length', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const longKey = 'a'.repeat(100) // Very long key
@@ -326,7 +326,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache(longKey, state)
+			const cleanup = cache.persist(longKey, state)
 
 			// Assert - Table should be created successfully
 			const db = new DatabaseSync(dbPath)

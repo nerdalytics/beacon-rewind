@@ -1,19 +1,19 @@
 import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, it } from 'node:test'
-import { BeaconCache } from '../src/index.ts'
+import { BeaconRewind } from '../src/index.ts'
 import { createMockState, createTempDbPath } from './test-helpers.ts'
 
 /**
- * Constructor behavior tests for BeaconCache.
+ * Constructor behavior tests for BeaconRewind.
  *
- * This file contains unit tests for BeaconCache constructor, testing:
+ * This file contains unit tests for BeaconRewind constructor, testing:
  * - Default in-memory database creation
  * - Custom database path configuration
  * - Database setup and optimization pragmas
  */
 describe(
-	'BeaconCache Constructor',
+	'BeaconRewind Constructor',
 	{
 		concurrency: true,
 		timeout: 1000,
@@ -23,7 +23,7 @@ describe(
 			// Arrange
 
 			// Act
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 
 			// Assert
 			// We can't directly access the private database field, but we can verify
@@ -32,7 +32,7 @@ describe(
 				const state = createMockState({
 					value: 42,
 				})
-				const cleanup = cache.cache('test', state)
+				const cleanup = cache.persist('test', state)
 				cleanup?.()
 			})
 
@@ -44,7 +44,7 @@ describe(
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
 
 			// Act
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -54,7 +54,7 @@ describe(
 				const state = createMockState({
 					value: 42,
 				})
-				const cleanup = cache.cache('test', state)
+				const cleanup = cache.persist('test', state)
 				cleanup?.()
 			})
 
@@ -65,7 +65,7 @@ describe(
 		it('should set up database with performance optimizations', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			new BeaconCache({
+			new BeaconRewind({
 				databasePath: dbPath,
 			})
 
@@ -109,7 +109,7 @@ describe(
 			// Act & Assert
 			assert.throws(
 				() => {
-					new BeaconCache({
+					new BeaconRewind({
 						databasePath: invalidPath,
 					})
 				},

@@ -1,20 +1,20 @@
 import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, it } from 'node:test'
-import { BeaconCache } from '../src/index.ts'
+import { BeaconRewind } from '../src/index.ts'
 import { createMockState, createTempDbPath } from './test-helpers.ts'
 
 /**
- * Memory management tests for BeaconCache.
+ * Memory management tests for BeaconRewind.
  *
- * This file contains unit tests for BeaconCache memory management, testing:
+ * This file contains unit tests for BeaconRewind memory management, testing:
  * - Cleanup function behavior
  * - Table and view cleanup
  * - Multiple cache operations
  * - Error handling during cleanup
  */
 describe(
-	'BeaconCache Memory Management',
+	'BeaconRewind Memory Management',
 	{
 		concurrency: true,
 		timeout: 1000,
@@ -23,7 +23,7 @@ describe(
 		it('should drop table when cleanup function is called', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -31,7 +31,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('dropTest', state)
+			const cleanup = cache.persist('dropTest', state)
 
 			// Verify table exists
 			const db = new DatabaseSync(dbPath)
@@ -60,13 +60,13 @@ describe(
 
 		it('should handle multiple cleanup calls gracefully', (): void => {
 			// Arrange
-			const cache = new BeaconCache()
+			const cache = new BeaconRewind()
 			const state = createMockState({
 				value: 'multiple cleanup',
 			})
 
 			// Act
-			const cleanup = cache.cache('multiCleanup', state)
+			const cleanup = cache.persist('multiCleanup', state)
 
 			// Assert - Multiple cleanup calls should not throw
 			assert.doesNotThrow(() => {
@@ -81,7 +81,7 @@ describe(
 		it('should handle multiple cache operations', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const cleanups: Array<(() => void) | undefined> = []
@@ -91,7 +91,7 @@ describe(
 				const state = createMockState({
 					index: i,
 				})
-				const cleanup = cache.cache(`key_${i}`, state)
+				const cleanup = cache.persist(`key_${i}`, state)
 				cleanups.push(cleanup)
 			}
 
@@ -138,7 +138,7 @@ describe(
 		it('should handle State reference replacement', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state1 = createMockState({
@@ -149,8 +149,8 @@ describe(
 			})
 
 			// Act
-			const cleanup1 = cache.cache('replace', state1)
-			const cleanup2 = cache.cache('replace', state2)
+			const cleanup1 = cache.persist('replace', state1)
+			const cleanup2 = cache.persist('replace', state2)
 
 			// Assert - Both cleanups should work
 			assert.ok(cleanup1)
@@ -177,7 +177,7 @@ describe(
 		it('should clean up view along with table', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state = createMockState({
@@ -185,7 +185,7 @@ describe(
 			})
 
 			// Act
-			const cleanup = cache.cache('viewCleanup', state)
+			const cleanup = cache.persist('viewCleanup', state)
 
 			// Verify view exists
 			const db = new DatabaseSync(dbPath)
@@ -215,7 +215,7 @@ describe(
 		it('should allow caching after cleanup', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const state1 = createMockState({
@@ -226,11 +226,11 @@ describe(
 			})
 
 			// Act - First round
-			const cleanup1 = cache.cache('reuse', state1)
+			const cleanup1 = cache.persist('reuse', state1)
 			cleanup1?.()
 
 			// Second round - should work fine
-			const cleanup2 = cache.cache('reuse', state2)
+			const cleanup2 = cache.persist('reuse', state2)
 
 			// Assert - Table should exist again
 			const db = new DatabaseSync(dbPath)
@@ -250,7 +250,7 @@ describe(
 		it('should handle concurrent cleanup operations', (): void => {
 			// Arrange
 			const { dbPath, cleanup: cleanupTemp } = createTempDbPath()
-			const cache = new BeaconCache({
+			const cache = new BeaconRewind({
 				databasePath: dbPath,
 			})
 			const states = Array.from(
@@ -262,7 +262,7 @@ describe(
 						id: i,
 					})
 			)
-			const cleanups = states.map((state, i) => cache.cache(`concurrent_${i}`, state))
+			const cleanups = states.map((state, i) => cache.persist(`concurrent_${i}`, state))
 
 			// Act - Cleanup all at once (simulating concurrent cleanup)
 			for (const cleanup of cleanups) {

@@ -1,12 +1,12 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { state } from '@nerdalytics/beacon'
+import { type State, state } from '@nerdalytics/beacon'
 
 /**
- * Test helpers for BeaconCache tests.
+ * Test helpers for BeaconRewind tests.
  *
- * This file contains shared utilities for testing BeaconCache
+ * This file contains shared utilities for testing BeaconRewind
  * using the real @nerdalytics/beacon state function.
  */
 
@@ -44,7 +44,7 @@ export function createTempDir(): {
 	path: string
 	cleanup: () => void
 } {
-	const tempDir = mkdtempSync(join(tmpdir(), 'beacon-cache-test-'))
+	const tempDir = mkdtempSync(join(tmpdir(), 'beacon-rewind-test-'))
 
 	return {
 		cleanup: (): void => {
@@ -80,4 +80,4 @@ export function createTempDbPath(filename: string = 'test.db'): {
  * Creates a beacon state for testing.
  * Re-exports the real state function for convenience.
  */
-export const createMockState: unknown = state
+export const createMockState: <T>(initialValue: T, equalityFn?: (a: T, b: T) => boolean) => State<T> = state
