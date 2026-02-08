@@ -12,7 +12,7 @@ const DATABASE_CONFIG = {
 } as const
 
 /**
- * Configuration options for BeaconCache
+ * Configuration options for BeaconRewind
  */
 export interface Options {
 	/**
@@ -34,10 +34,10 @@ interface TableStatements {
 export type CleanupFn = () => void
 
 /**
- * A persistent cache for Beacon state values using SQLite.
+ * Persist Beacon state. Rewind when you need to.
  * Provides time-travel capabilities by storing historical state values.
  */
-export class BeaconCache {
+export class BeaconRewind {
 	#database: DatabaseSync
 	#databasePath: string
 	#tableStatements = new Map<string, TableStatements>()
@@ -53,14 +53,14 @@ export class BeaconCache {
 	}
 
 	/**
-	 * Caches a Beacon state with persistence and synchronization.
-	 * Returns a cleanup function to stop caching, or undefined if database is closed.
+	 * Persists a Beacon state with automatic synchronization.
+	 * Returns a cleanup function to stop persisting, or undefined if database is closed.
 	 *
 	 * @param key - Unique identifier for the cached state
-	 * @param state - The Beacon state to cache
-	 * @returns Cleanup function to stop caching and remove the table, or undefined
+	 * @param state - The Beacon state to persist
+	 * @returns Cleanup function to stop persisting and remove the table, or undefined
 	 */
-	cache<T>(key: string, state: State<T>): CleanupFn | undefined {
+	persist<T>(key: string, state: State<T>): CleanupFn | undefined {
 		if (!this.#database.isOpen) {
 			return
 		}
@@ -87,16 +87,16 @@ export class BeaconCache {
 			}
 		} catch (error: unknown) {
 			// Clean up the state reference if initialization fails
-			// This cleanup is necessary to prevent memory leaks when cache() throws
+			// This cleanup is necessary to prevent memory leaks when persist() throws
 			this.#stateRefs.delete(key)
 			throw error
 		}
 	}
 
 	/**
-	 * Rewinds a cached state by the specified number of steps.
+	 * Rewinds a persisted state by the specified number of steps.
 	 *
-	 * @param key - The cache key to rewind
+	 * @param key - The key to rewind
 	 * @param steps - Number of steps to rewind (0 = no change, negative or >= total records = rewind to beginning)
 	 */
 	rewind(key: string, steps: number): void {
