@@ -2,21 +2,21 @@
 
 ## Architecture
 
-`BeaconCache` wraps `node:sqlite` (`DatabaseSync`) to persist `@nerdalytics/beacon` `State<T>` values. Each cached key gets its own SQLite table with autoincrementing IDs, enabling time-travel via `rewind()`.
+`BeaconRewind` wraps `node:sqlite` (`DatabaseSync`) to persist `@nerdalytics/beacon` `State<T>` values. Each cached key gets its own SQLite table with autoincrementing IDs, enabling time-travel via `rewind()`.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `index.ts` | `BeaconCache` class — `cache()`, `rewind()`, SQLite lifecycle |
+| `index.ts` | `BeaconRewind` class — `persist()`, `rewind()`, SQLite lifecycle |
 | `core/sql.ts` | Tagged template SQL builder — `sql`, `raw`, `join`, `bulk` |
 
-## BeaconCache Internals
+## BeaconRewind Internals
 
 - `#database` — `DatabaseSync` instance (WAL mode, memory-mapped I/O)
 - `#tableStatements` — `Map<string, TableStatements>` of prepared statements per key
 - `#stateRefs` — `Map<string, WeakRef<State>>` to track live state for `rewind()`
-- `cache(key, state)` — creates table, restores latest value, sets up `effect()` to auto-persist, returns cleanup function
+- `persist(key, state)` — creates table, restores latest value, sets up `effect()` to auto-persist, returns cleanup function
 - `rewind(key, steps)` — deletes future records, sets state to historical value
 - `#sanitizeKeyForTable(key)` — prefixes `cache_` and replaces non-alphanumeric with `_`
 
@@ -47,10 +47,10 @@ Pre-built SQL generators using the `sql` tagged template. Two subsystems:
 | `generate-create-replay-table.ts` | Creates per-key replay table (autoincrement `id`, `state`) |
 | `generate-insert-into-replay-query.ts` | Insert state snapshot into replay table |
 
-<!--— BEACON-CACHE-START —>[src Index]
+<!--— BEACON-REWIND-START —>[src Index]
 |root: ./src
-|IMPORTANT: BeaconCache uses private fields (#) — test via public API only
-|index.ts:{BeaconCache,Options,CleanupFn}
+|IMPORTANT: BeaconRewind uses private fields (#) — test via public API only
+|index.ts:{BeaconRewind,Options,CleanupFn}
 |core:{sql.ts}
 |core/statements:{create-kv-store-table.ts,generate-create-replay-table.ts,generate-insert-into-kv-store-query.ts,generate-insert-into-replay-query.ts,generate-select-from-kv-store-query.ts,generate-delete-from-kv-store-query.ts}
-<!--— BEACON-CACHE-END —>
+<!--— BEACON-REWIND-END —>

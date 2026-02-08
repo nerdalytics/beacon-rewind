@@ -1,6 +1,6 @@
-# beacon-cache
+# beacon-rewind
 
-Persistent SQLite cache with time-travel for `@nerdalytics/beacon` reactive state.
+Persist Beacon state. Rewind when you need to.
 
 ## Quick Commands
 
@@ -8,7 +8,7 @@ Persistent SQLite cache with time-travel for `@nerdalytics/beacon` reactive stat
 |---------|---------|
 | `node --test --experimental-test-coverage tests/**/*.test.ts` | Run all tests with coverage |
 | `node examples/basic-usage.ts` | Run basic usage example |
-| `node examples/cache-restoration-demo.ts` | Run cache restoration demo |
+| `node examples/persistence-demo.ts` | Run persistence demo |
 | `npx npm-check-updates --interactive --upgrade --removeRange` | Update dependencies |
 
 ## Stack
@@ -26,10 +26,10 @@ Persistent SQLite cache with time-travel for `@nerdalytics/beacon` reactive stat
 - Biome enforces `useExplicitType` — all functions need explicit return types
 - No `any` — `noExplicitAny` is enforced
 
-<!--— BEACON-CACHE-START —>[beacon-cache Index]
+<!--— BEACON-REWIND-START —>[beacon-rewind Index]
 |root: .
 |IMPORTANT: Read folder AGENTS.md before working in that domain
 |src:{AGENTS.md}
 |tests:{AGENTS.md}
-|examples:{basic-usage.ts,cache-restoration-demo.ts}
-<!--— BEACON-CACHE-END —>
+|examples:{basic-usage.ts,persistence-demo.ts}
+<!--— BEACON-REWIND-END —>
