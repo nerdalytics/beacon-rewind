@@ -2,6 +2,11 @@
 
 > Persist Beacon state. Rewind when you need to.
 
+
+[![license:mit](https://flat.badgen.net/static/license/MIT/blue)](https://github.com/nerdalytics/beacon-rewind/blob/trunk/LICENSE)
+[![registry:npm:version](https://img.shields.io/npm/v/@nerdalytics/beacon-rewind.svg)](https://www.npmjs.com/package/@nerdalytics/beacon-rewind)
+[![Socket Badge](https://badge.socket.dev/npm/package/@nerdalytics/beacon-rewind/1.0.0)](https://socket.dev/npm/package/@nerdalytics/beacon-rewind/overview/1.0.0)
+
 [![tech:nodejs](https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![language:typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org/)
 [![linter:biome](https://img.shields.io/badge/biome-60a5fa?style=for-the-badge&logo=biome&logoColor=white)](https://biomejs.dev/)
@@ -39,6 +44,11 @@ console.log(count()) // 1
 // Stop persisting and drop the table
 cleanup?.()
 ```
+
+## Documentation
+
+Full documentation, API reference, and examples available at:
+**[github.com/nerdalytics/beacon-rewind](https://github.com/nerdalytics/beacon-rewind)**
 
 ## License
 
